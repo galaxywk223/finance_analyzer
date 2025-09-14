@@ -1,27 +1,27 @@
-# app/__init__.py (最终修正版)
+# app/__init__.py (修正CORS配置的版本)
 
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
+from flask_cors import CORS
 from config import Config
 
-# 在这里，我们只创建扩展实例，不进行任何从 app 子模块的导入
 db = SQLAlchemy()
 migrate = Migrate()
 
 
 def create_app(config_class=Config):
-    """
-    应用工厂函数。
-    """
     app = Flask(__name__)
     app.config.from_object(config_class)
 
-    # 将扩展实例与 app 绑定
+    # 将原来的 CORS(app) 替换为下面这行更详细的配置
+    # 这会明确告诉浏览器，允许所有来源，并支持携带cookies等凭证
+    CORS(app, supports_credentials=True)
+
     db.init_app(app)
     migrate.init_app(app, db)
 
-    # --- 将所有的蓝图、模型、命令导入都放在函数内部 ---
+    # --- 后面的蓝图等部分保持不变 ---
     from app.api.auth import bp as auth_bp
 
     app.register_blueprint(auth_bp, url_prefix="/api")
@@ -42,7 +42,6 @@ def create_app(config_class=Config):
 
     app.register_blueprint(advice_bp, url_prefix="/api")
 
-    # 这两个导入对于让 Flask-Migrate 和 SQLAlchemy 发现模型至关重要
     from app import models
     from app import commands
 

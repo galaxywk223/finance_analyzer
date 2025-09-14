@@ -1,3 +1,4 @@
+// src/main.js (Correct Content)
 import './assets/main.css'
 
 import { createApp } from 'vue'
